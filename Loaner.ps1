@@ -73,48 +73,6 @@ Function Write-Log {
 
     Add-Content -Path $logFile -Value "[$CompName] - $timestamp [$level] - $line $LineNumber - $message"
 }
-$LukeUseTheForce = {
-    # Define the Wi-Fi network name
-    $networkName = "Faculty & Staff"
-
-    # Check if connected to the specified network
-    $connectedToNetwork = (netsh wlan show interfaces) -match "SSID\s+:\s+$networkName"
-
-    if (-not ($connectedToNetwork)) {
-        # Remove Wi-Fi profile
-
-        # Prompt user for new credentials
-        $username = Read-Host "Enter your Wi-Fi username"
-        $password = Read-Host -AsSecureString "Enter your Wi-Fi password"
-
-        # Connect to Wi-Fi network with new credentials
-        netsh wlan add profile filename="$networkName.xml" interface="Wi-Fi"
-        netsh wlan connect name="$networkName" user="$username" keyMaterial=(ConvertFrom-SecureString $password -AsPlainText)
-    }
-
-}
-$CipherShift = {
-    Function PassoutFile {
-        if (-not (Test-Path -Path $PassoutFilePath)) { # checks to see if the file exists. If it does not, it creates it.
-            # File does not exist
-            Write-Verbose "File does not exist. Creating and adding text."
-            Write-Log -message "File does not exist. Creating and adding text."
-            New-Item -Path $PassoutFilePath -ItemType File | Out-Null
-            Add-Content -Path $PassoutFilePath -Value "@echo off" | Add-Content -Path $PassoutFilePath -Value ""
-            Add-Content -Path $PassoutFilePath -Value "net user smcloaner 5MC256*Xc!" | Add-Content -Path $PassoutFilePath -Value ""
-            Add-Content -Path $PassoutFilePath -Value "exit"
-            Write-Verbose "Password batch file created."
-        }
-        else {
-            # File already exists
-            Write-Verbose "File already exists."
-        }
-    }
-    PassoutFile
-    Write-Verbose "Deleting LoanerTimeout and updating Date/Time"
-    Unregister-ScheduledTask -TaskName LoanerTimeout -Confirm:$false
-    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Description $taskDescription -Settings $settings -RunLevel Highest -Force
-}
 $UserRemake = { # This function is used to create the loaner user and delete the old one. Used to be called UserSwap
     Function delete_loaneruser {
         process {
@@ -159,26 +117,7 @@ $UserRemake = { # This function is used to create the loaner user and delete the
     }
     RunUserRemake
 }
-$DellUpdates = {
-    Write-Verbose "Starting Dell Updates...."
-    $file = "C:\PROGRAM FILES\Dell\CommandUpdate\dcu-cli.exe"
-    $schedule = "/configure -scheduleMonthly=06,23:00 -userConsent=disable -autoSuspendBitLocker=enable -outputLog=c:\temp\dell.log -silent"
-    $command = "/applyUpdates -autoSuspendBitLocker=enable -reboot=enable -outputLog=c:\temp\dell.log -silent"
-    $base = "/driverinstall -silent"
-    If (!(test-path -PathType Container "c:\temp")) {
-        New-Item -ItemType Directory -Path "c:\temp"
-    }
-    if ([System.IO.File]::Exists($file)) {
-        Start-Process -FilePath $file -ArgumentList $schedule
-        Start-Process -FilePath $file -ArgumentList $base
-        Start-Process -FilePath $file -ArgumentList $command 
-        Write-Verbose "Starting Dell updates."
-    }
-    else {
-        Write-Verbose "Dell Command Update not installed"
-        exit
-    }
-}
+
 $WarpCoreUpdate = {
     Write-Verbose "Warp Core Updates Engaged, Please stay clear...."
     Write-Log -message "Warp Core Updates Engaged, Please stay clear"
@@ -227,10 +166,8 @@ Function RunForestRun {
         Write-Log -message "System configuration underway..."    
     }
     Log
-    #& $CipherShift
-    #& $LukeUseTheForce
     & $UserRemake
-    #& $DellUpdates
-    #& $WarpCoreUpdate
+    & $DellUpdates
+    & $WarpCoreUpdate
 }
 RunForestRun
