@@ -32,14 +32,6 @@ $VerbosePreference = "Continue"
 
 # change date here for when the loaner is to be locked by.
 $LoanerUseByDate = Get-Date -Year 2024 -Month 01 -Day 24 -Hour 14 -Minute 45 -Second 00
-$LoanerUseByDateString = $LoanerUseByDate.ToString("yyyy-MM-ddTHH:mm:ss")
-
-# Loaner User Variables
-$LoanerUser = "smcloaner"
-$LoanerPass = ConvertTo-SecureString "Smcloaner1" -AsPlainText -Force  # Super strong plane text password here (yes this isn't secure at all)
-$LoanerName = "SMC Loaner"
-$LoanerDesc = 'Local Account for the SMC loaners' 
-$LoanerGroup = "Users"
 
 # Log Variables
 $timestamp = (Get-Date).toString("yyyy_MM_dd HH:mm:ss")
@@ -47,14 +39,6 @@ $LogFileName = "Loaner_Log_" + (Get-Date).ToString("yyyy-MM-dd_HH-mm-ss") + "_lo
 $logFile = "d:\logfiles\$LogFileName"
 $logDir = "d:\logfiles"
 $CompName = "$env:COMPUTERNAME"
-
-# Task Scheduler Variables
-$PassoutFilePath = "C:\Users\Administrator\Documents\Loaner Password Timeout.bat"
-$action = New-ScheduledTaskAction -Execute $PassoutFilePath
-$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries
-$trigger = New-ScheduledTaskTrigger -Once -At $LoanerUseByDateString
-$taskName = "LoanerTimeout"
-$taskDescription = "This task is for changing the password on the loaner computer."
 
 # Functions
 Function Write-Log {
@@ -73,49 +57,14 @@ Function Write-Log {
 
     Add-Content -Path $logFile -Value "[$CompName] - $timestamp [$level] - $line $LineNumber - $message"
 }
-$LukeUseTheForce = {
-    # Define the Wi-Fi network name
-    $networkName = "Faculty & Staff"
 
-    # Check if connected to the specified network
-    $connectedToNetwork = (netsh wlan show interfaces) -match "SSID\s+:\s+$networkName"
-
-    if (-not ($connectedToNetwork)) {
-        # Remove Wi-Fi profile
-
-        # Prompt user for new credentials
-        $username = Read-Host "Enter your Wi-Fi username"
-        $password = Read-Host -AsSecureString "Enter your Wi-Fi password"
-
-        # Connect to Wi-Fi network with new credentials
-        netsh wlan add profile filename="$networkName.xml" interface="Wi-Fi"
-        netsh wlan connect name="$networkName" user="$username" keyMaterial=(ConvertFrom-SecureString $password -AsPlainText)
-    }
-
-}
-$CipherShift = {
-    Function PassoutFile {
-        if (-not (Test-Path -Path $PassoutFilePath)) { # checks to see if the file exists. If it does not, it creates it.
-            # File does not exist
-            Write-Verbose "File does not exist. Creating and adding text."
-            Write-Log -message "File does not exist. Creating and adding text."
-            New-Item -Path $PassoutFilePath -ItemType File | Out-Null
-            Add-Content -Path $PassoutFilePath -Value "@echo off" | Add-Content -Path $PassoutFilePath -Value ""
-            Add-Content -Path $PassoutFilePath -Value "net user smcloaner 5MC256*Xc!" | Add-Content -Path $PassoutFilePath -Value ""
-            Add-Content -Path $PassoutFilePath -Value "exit"
-            Write-Verbose "Password batch file created."
-        }
-        else {
-            # File already exists
-            Write-Verbose "File already exists."
-        }
-    }
-    PassoutFile
-    Write-Verbose "Deleting LoanerTimeout and updating Date/Time"
-    Unregister-ScheduledTask -TaskName LoanerTimeout -Confirm:$false
-    Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Description $taskDescription -Settings $settings -RunLevel Highest -Force
-}
-$UserRemake = { # This function is used to create the loaner user and delete the old one. Used to be called UserSwap
+$UserRemake = { # This function is used to create the loaner user and delete the old one. 
+    # Loaner User Variables
+    $LoanerUser = "smcloaner"
+    $LoanerPass = ConvertTo-SecureString "Smcloaner1" -AsPlainText -Force  # Super strong plane text password here (yes this isn't secure at all)
+    $LoanerName = "SMC Loaner"
+    $LoanerDesc = 'Local Account for the SMC loaners' 
+    $LoanerGroup = "Users"
     Function delete_loaneruser {
         process {
             try {
@@ -219,7 +168,68 @@ $WarpCoreUpdate = {
     Get-WUInstall -MicrosoftUpdate -AcceptAll -AutoReboot 
     Get-WUInstall -MicrosoftUpdate -AcceptAll -Download -Install -AutoReboot
 }
+$PragueCheck = {
+    function SoftwareInstalled {
+        param (
+            [string]$softwareName,
+            [string]$vendorName
+        )
 
+        $softwareInstalled = Get-WmiObject -Class Win32_Product | Where-Object { $_.Name -like $softwareName -and $_.Vendor -eq $vendorName }
+
+        if ($softwareInstalled) {
+            Write-Host "$softwareName is installed."
+        }
+        else {
+            Write-Host "$softwareName is not installed."
+        }
+    }
+
+    $softwareList = @(
+        @{ Name = "Java"; Vendor = "Oracle Corporation" },
+        @{ Name = "FileWave Client"; Vendor = "FileWave" },
+        @{ Name = "Windows Agent"; Vendor = "N-able Technologies" }
+    )
+
+    foreach ($software in $softwareList) {
+        SoftwareInstalled -softwareName $software.Name -vendorName $software.Vendor
+    }
+    function UninstallSoftware {
+        param (
+            [string]$softwareName,
+            [string]$vendorName
+        )
+
+        $softwareInstalled = Get-WmiObject -Class Win32_Product | Where-Object { $_.Name -like $softwareName -and $_.Vendor -eq $vendorName }
+
+        if ($softwareInstalled) {
+            Write-Host "$softwareName is installed. Uninstalling..."
+            Write-Log -message "$softwareName is installed. Uninstalling..."
+            $softwareInstalled.Uninstall()
+        
+            Write-Host "Uninstalled $softwareName"
+            Write-Log -message "Uninstalled $softwareName"
+        }
+        else {
+            Write-Host "$softwareName is not installed."
+        }
+    }
+    function DellInstall {
+        Set-Location "C:\Users\Administrator\Downloads"
+        $file = "Dell-Command-Update-Application_8D5MC_WIN_4.3.0_A00_04.EXE"
+        $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+        $headers.Add("Authorization", "token $credentials")
+        $headers.Add("Accept", "application/json")
+        $download = "https://dl.dell.com/FOLDER07582851M/5/Dell-Command-Update-Application_8D5MC_WIN_4.3.0_A00_04.EXE"
+        Write-Host "Dowloading Dell Command Update Installer"
+        Invoke-WebRequest -Uri $download -Headers $headers -OutFile $file
+        .\Dell-Command-Update-Application_8D5MC_WIN_4.3.0_A00_04.EXE /s
+        
+    }
+    UninstallSoftware -softwareName "Dell Command | Update" -vendorName "Dell Inc."
+    DellInstall
+    
+}
 Function RunForestRun {
     Function Log {
         Write-Log -message "#########"
@@ -227,10 +237,10 @@ Function RunForestRun {
         Write-Log -message "System configuration underway..."    
     }
     Log
-    #& $CipherShift
-    #& $LukeUseTheForce
+
+    & $PragueCheck
     & $UserRemake
-    #& $DellUpdates
-    #& $WarpCoreUpdate
+    & $DellUpdates
+    & $WarpCoreUpdate
 }
 RunForestRun
