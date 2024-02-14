@@ -360,9 +360,9 @@ Function RunForestRun {
     }
     Log
 
-    #& $PragueCheck
-    #& $UserRemake
-    #& $PreLoginSetup
-    #& $DellUpdates
+    & $PragueCheck
+    & $UserRemake
+    & $PreLoginSetup
+    & $DellUpdates
 }
 RunForestRun
