@@ -33,7 +33,7 @@ function detect {
         Exit 1
     }
 }
-<# 
+
 
 function update {
     try {
@@ -44,4 +44,9 @@ function update {
         Write-Error $_.Exception
     }
 }
-#>
+
+function  Run {
+    detect
+    update
+}
+Run
