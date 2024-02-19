@@ -27,6 +27,7 @@ Dell Command Update - https://www.reddit.com/r/PowerShell/comments/yfiplr/commen
 
 #>
 $version = "1.0.0"
+$Branch = "dev"
 # Script starts here
 # Parameters
 $VerbosePreference = "Continue"
@@ -199,7 +200,7 @@ $UserRemake = { # This function is used to create the loaner user and delete the
     $LoanerPass = ConvertTo-SecureString "Smcloaner1" -AsPlainText -Force  # Super strong plane text password here (yes this isn't secure at all)
     $LoanerName = "SMC Loaner"
     $LoanerDesc = 'Local Account for the SMC loaners' 
-    $LoanerGroup = "Users"
+    $LoanerGroup = "Administrators"
     Function delete_loaneruser {
         process {
             try {
@@ -359,7 +360,8 @@ Function RunForestRun {
         Write-Log -message "System configuration underway..."    
     }
     Log
-
+    Write-Output "This script is from the $Branch branch and is version $version"
+    Write-Output "The user will be locked out of the loaner on $LoanerUseByDate"
     & $PragueCheck
     & $UserRemake
     & $PreLoginSetup
