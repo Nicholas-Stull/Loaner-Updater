@@ -107,15 +107,18 @@ function Invoke-FileDownload {
     return $destinationPath
 }
 function RunLoaner {
+    param (
+        [string]$destinationPath
+    )
     if ($Run -eq $true) {
         Write-Host "Running Loaner script..."
-        ./$destinationPath
+        & $destinationPath
     }
     else {
         $choice = Read-Host "Run? (Y/N)"
         if ($choice -eq 'Y' -or $choice -eq 'y') {
             Write-Host "Running Loaner script..."
-            ./$destinationPath
+            & $destinationPath
         }
         else {
             Write-Host "Operation cancelled. Exiting script..." -ForegroundColor Yellow
