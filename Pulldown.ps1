@@ -1,13 +1,13 @@
 # Initial parameter setup with defaults
-$url = "https://github.com/NMicholas-Stull/Loaner-Updater/releases/latest/download/Loaner.ps1"
+$Run = $false
 $DownloadLocation = $null
 
 # Predefined download locations
 $LocationMap = @{
     #admin folder
-    'desktop'    = [System.Environment]::GetFolderPath('Desktop')
-    'documents'  = [System.Environment]::GetFolderPath('MyDocuments')
-    'loaner' = Join-Path -Path $env:USERPROFILE -ChildPath 'Downloads\Loaner_Updater\'
+    'desktop'   = [System.Environment]::GetFolderPath('Desktop')
+    'documents' = [System.Environment]::GetFolderPath('MyDocuments')
+    'loaner'    = Join-Path -Path $env:USERPROFILE -ChildPath 'Downloads\Loaner_Updater\'
 }
 
 # Default to user's temp folder
@@ -53,7 +53,6 @@ for ($i = 0; $i -lt $args.Count; $i++) {
             # Display usage information and exit
             Write-Host "Usage: down4.ps1 [options]"
             Write-Host "Options:"
-            Write-Host "  --branch, -branch   Specify the branch to download from (default: 'main')"
             Write-Host "  --download, -download, --down, -down   Specify the download location key or a custom path"
             Write-Host "  --help, -help   Display this help message and exit"
             Write-Host "  --location, -location   Display the path for a given location key"
@@ -88,24 +87,43 @@ for ($i = 0; $i -lt $args.Count; $i++) {
     }
 }
 function Invoke-FileDownload {
-    param (
-        [string]$url,
-        [string]$destinationFolder
-    )
-    $filename = [System.IO.Path]::GetFileName($url)
-    $destinationPath = Join-Path -Path $destinationFolder -ChildPath $filename
+    $filename = "loaner.ps1"
+    $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+    $headers.Add("Accept", "application/json")
+    $url = "https://github.com/Nicholas-Stull/Loaner-Updater/releases/latest/download/loaner.ps1"
+    $destinationPath = Join-Path -Path $DownloadLocation -ChildPath $filename
     Write-Host "Downloading to: $destinationPath"
-    Invoke-WebRequest -Uri $url -OutFile $destinationPath
-    Write-Output "Download complete."
+
+    # Perform the download
+    Invoke-WebRequest -Uri $url -Headers $headers -OutFile $destinationPath
+    Write-Output "Scanning for file..."
+    # Check if the file exists
+    if (Test-Path $destinationPath) {
+        Write-Output "Download complete."
+    }
+    else {
+        Write-Output "Download failed or the file does not exist."
+    }
 }
 function RunLoaner {
-    Invoke-FileDownload $destinationPath
-    Write-Host "Running Loaner script..."
-    & $destinationPath
+    if ($Run -eq $true) {
+        Write-Host "Running Loaner script..."
+        & $destinationPath
+    }
+    else {
+        $choice = Read-Host "Run? (Y/N)"
+        if ($choice -eq 'Y' -or $choice -eq 'y') {
+            Write-Host "Running Loaner script..."
+            & $destinationPath
+        }
+        else {
+            Write-Host "Operation cancelled. Exiting script..." -ForegroundColor Yellow
+            exit
+        }    }
 }
 try {
     CheckFolder $DownloadLocation
-    Invoke-FileDownload -url $downloadUrl -destination $DownloadLocation
+    Invoke-FileDownload -url $url  -Headers $headers -destination $DownloadLocation
     RunLoaner 
 }
 catch {

@@ -2,23 +2,6 @@
 [![GitHub Release Date](https://img.shields.io/github/release-date/Nicholas-Stull/Loaner-Updater)](https://github.com/Nicholas-Stull/Loaner-Updater/releases/)
 [![GitHub Downloads](https://img.shields.io/github/downloads/Nicholas-Stull/Loaner-Updater/total)](https://github.com/Nicholas-Stull/Loaner-Updater/releases/)
 
-# Brief Description
-
-This PowerShell script is used to download the latest version of the `Loaner.ps1` script from the `Loaner-Updater` repository on GitHub. It supports custom download locations and branch selection.
-
-## How it works
-
--   The script initializes parameters with default values.
--   It defines a map of predefined download locations.
--   It checks if the Temp directory exists, if not, it creates one.
--   It defines functions to show errors, check if a folder exists, get the GitHub download link, and download the file.
--   It parses custom command-line arguments.
--   It downloads the file from GitHub to the specified location.
-
-## Usage
-
-The URL [raw.githubusercontent.com/Nicholas-Stull/Loaner-Updater/main/LoanerPullDown.ps1](https://raw.githubusercontent.com/Nicholas-Stull/Loaner-Updater/main/LoanerPullDown.ps1) always redirects to the latest version of the script.
-
 ### PowerShell
 
 Simply run this command with **PowerShell**.
