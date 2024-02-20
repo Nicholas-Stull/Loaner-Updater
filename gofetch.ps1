@@ -1,6 +1,8 @@
 # Initial parameter setup with defaults
 $Run = $false
 $DownloadLocation = $null
+$destinationPath = $null  # Define $destinationPath outside the functions
+
 
 # Predefined download locations
 $LocationMap = @{
@@ -130,8 +132,10 @@ function Setup {
 
 }
 try {
-    $Setup
-    CheckFolder $DownloadLocation
+    Setup
+    CheckFolder $DownloadLocation    
+    $destinationPath = Invoke-FileDownload  # Assign the value returned by Invoke-FileDownload to $destinationPath
+
     Invoke-FileDownload -url $url  -Headers $headers -destination $DownloadLocation
     RunLoaner 
 }
