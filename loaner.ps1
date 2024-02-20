@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    LoanerTimeout.ps1 - A script for updating loaners for the next semester
+    loaner.ps1 - A script for updating loaners for the next semester
 
 .DESCRIPTION
     This script updates loaners to be sent out for the next semester. It essentially performs a user wipe.
