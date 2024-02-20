@@ -109,7 +109,7 @@ function Invoke-FileDownload {
 function RunLoaner {
     if ($Run -eq $true) {
         Write-Host "Running Loaner script..."
-        & $destinationPath
+        ./$destinationPath
     }
     else {
         $choice = Read-Host "Run? (Y/N)"
