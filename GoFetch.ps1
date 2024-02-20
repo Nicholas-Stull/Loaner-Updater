@@ -1,3 +1,31 @@
+<#
+.SYNOPSIS
+    Downloads the latest version of the Loaner script from the GitHub repository and runs it.
+.DESCRIPTION
+    This script downloads the latest version of the Loaner script from the GitHub repository and runs it.
+    The download location can be specified using the --download option, which accepts a location key or a custom path.
+    If no download location is specified, the script will default to the user's temp folder.
+    The --location option can be used to display the path for a given location key.
+    The --help option displays usage information.
+.PARAMETER download
+    Specifies the download location key or a custom path.
+    If a location key is specified, the script will use the predefined download location associated with the key.
+    If a custom path is specified, the script will use the specified path as the download location. 
+.PARAMETER location
+    Displays the path for a given location key.
+.PARAMETER help
+    Displays usage information.
+.EXAMPLE
+    .\pulldown.ps1 --download desktop
+    Downloads the latest version of the Loaner script to the user's desktop.
+.EXAMPLE
+    .\pulldown.ps1 --download C:\Downloads
+    Downloads the latest version of the Loaner script to the specified custom path.
+#>
+
+
+
+
 # Initial parameter setup with defaults
 $Run = $false
 $DownloadLocation = $null
