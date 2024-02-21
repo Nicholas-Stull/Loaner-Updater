@@ -108,19 +108,29 @@ function Invoke-FileDownload {
     }
     return $destinationPath
 }
+
 function RunLoaner {
     param (
         [string]$destinationPath
     )
+    Write-Host "Running Loaner script..."
+    if (-not $destinationPath) {
+        Write-Host "Error: The destination path is not set." -ForegroundColor Red
+    } else {
+        Write-Host "Destination Path: $destinationPath"
+        & $destinationPath
+    }
+}
+function RunLoanerQuest {
+    
     if ($Run -eq $true) {
         Write-Host "Running Loaner script..."
         & $destinationPath
     }
-    else {
+    if ($Run -eq $false){
         $choice = Read-Host "Run? (Y/N)"
         if ($choice -eq 'Y' -or $choice -eq 'y') {
-            Write-Host "Running Loaner script..."
-            & $destinationPath
+           RunLoaner
         }
         else {
             Write-Host "Operation cancelled. Exiting script..." -ForegroundColor Yellow
@@ -135,9 +145,8 @@ try {
     Setup
     CheckFolder $DownloadLocation    
     $destinationPath = Invoke-FileDownload  # Assign the value returned by Invoke-FileDownload to $destinationPath
-
     Invoke-FileDownload -url $url  -Headers $headers -destination $DownloadLocation
-    RunLoaner 
+    RunLoanerQuest 
 }
 catch {
     Show-Error
