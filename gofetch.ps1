@@ -1,34 +1,8 @@
-<#
-.SYNOPSIS
-    Downloads the latest version of the Loaner script from the GitHub repository and runs it.
-.DESCRIPTION
-    This script downloads the latest version of the Loaner script from the GitHub repository and runs it.
-    The download location can be specified using the --download option, which accepts a location key or a custom path.
-    If no download location is specified, the script will default to the user's temp folder.
-    The --location option can be used to display the path for a given location key.
-    The --help option displays usage information.
-.PARAMETER download
-    Specifies the download location key or a custom path.
-    If a location key is specified, the script will use the predefined download location associated with the key.
-    If a custom path is specified, the script will use the specified path as the download location. 
-.PARAMETER location
-    Displays the path for a given location key.
-.PARAMETER help
-    Displays usage information.
-.EXAMPLE
-    .\pulldown.ps1 --download desktop
-    Downloads the latest version of the Loaner script to the user's desktop.
-.EXAMPLE
-    .\pulldown.ps1 --download C:\Downloads
-    Downloads the latest version of the Loaner script to the specified custom path.
-#>
-
-
-
-
 # Initial parameter setup with defaults
 $Run = $false
 $DownloadLocation = $null
+$destinationPath = $null  # Define $destinationPath outside the functions
+
 
 # Predefined download locations
 $LocationMap = @{
@@ -132,27 +106,47 @@ function Invoke-FileDownload {
     else {
         Write-Output "Download failed or the file does not exist."
     }
+    return $destinationPath
 }
+
 function RunLoaner {
+    param (
+        [string]$destinationPath
+    )
+    Write-Host "Running Loaner script..."
+    if (-not $destinationPath) {
+        Write-Host "Error: The destination path is not set." -ForegroundColor Red
+    } else {
+        Write-Host "Destination Path: $destinationPath"
+        & $destinationPath
+    }
+}
+function RunLoanerQuest {
+    
     if ($Run -eq $true) {
         Write-Host "Running Loaner script..."
         & $destinationPath
     }
-    else {
+    if ($Run -eq $false){
         $choice = Read-Host "Run? (Y/N)"
         if ($choice -eq 'Y' -or $choice -eq 'y') {
-            Write-Host "Running Loaner script..."
-            & $destinationPath
+           RunLoaner
         }
         else {
             Write-Host "Operation cancelled. Exiting script..." -ForegroundColor Yellow
             exit
         }    }
 }
+function Setup {
+    Write-Host "Downloading and Running..."
+
+}
 try {
-    CheckFolder $DownloadLocation
+    Setup
+    CheckFolder $DownloadLocation    
+    $destinationPath = Invoke-FileDownload  # Assign the value returned by Invoke-FileDownload to $destinationPath
     Invoke-FileDownload -url $url  -Headers $headers -destination $DownloadLocation
-    RunLoaner 
+    RunLoanerQuest 
 }
 catch {
     Show-Error
