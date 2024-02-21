@@ -146,29 +146,45 @@ function RunLoaner {
         }
         else {
             Write-Host "Operation cancelled. Exiting script..." -ForegroundColor Yellow
-            exit
+            return
         }    
     }
 }
-function UsetheForce {
+function RunLoaner {
     param (
-        [switch]$Force
+        [string]$destinationPath
     )
-
-    $isAdmin = [bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")
-    
-    if (-not $isAdmin -or $Force) {
-        # Run the script elevated
-        if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-            $arguments = "& '" + $myinvocation.mycommand.definition + "'"
-            Start-Process powershell -Verb RunAs -ArgumentList $arguments
-            exit
-        }
+    Write-Host "Running Loaner script..."
+    if (-not $destinationPath) {
+        Write-Host "Error: The destination path is not set." -ForegroundColor Red
+    } else {
+        Write-Host "Destination Path: $destinationPath"
+        & $destinationPath
     }
 }
+function RunLoanerQuest {
+    
+    if ($Run -eq $true) {
+        Write-Host "Running Loaner script..."
+        & $destinationPath
+    }
+    if ($Run -eq $false){
+        $choice = Read-Host "Run? (Y/N)"
+        if ($choice -eq 'Y' -or $choice -eq 'y') {
+           RunLoaner
+        }
+        else {
+            Write-Host "Operation cancelled. Exiting script..." -ForegroundColor Yellow
+            exit
+        }    }
+}
+function Setup {
+    Write-Host "Downloading and Running..."
+}
+
 
 try {
-    UsetheForce
+    setup
     CheckFolder $DownloadLocation
     Invoke-FileDownload -url $url  -Headers $headers -destination $DownloadLocation
     RunLoaner 
