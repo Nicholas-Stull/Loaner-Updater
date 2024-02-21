@@ -150,7 +150,25 @@ function RunLoaner {
         }    
     }
 }
+function UsetheForce {
+    param (
+        [switch]$Force
+    )
+
+    $isAdmin = [bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")
+    
+    if (-not $isAdmin -or $Force) {
+        # Run the script elevated
+        if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+            $arguments = "& '" + $myinvocation.mycommand.definition + "'"
+            Start-Process powershell -Verb RunAs -ArgumentList $arguments
+            exit
+        }
+    }
+}
+
 try {
+    UsetheForce
     CheckFolder $DownloadLocation
     Invoke-FileDownload -url $url  -Headers $headers -destination $DownloadLocation
     RunLoaner 
