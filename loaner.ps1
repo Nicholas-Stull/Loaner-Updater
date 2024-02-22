@@ -315,7 +315,8 @@ $DellUpdates = {
             
                 if ($DCU_analyze.updates.update.Count -lt 1) {
                     Write-Output "Compliant, no drivers needed"
-                    Exit 0
+                    Restart-Computer
+                    exit 0
                 }
                 else {
                     Write-Warning "Found drivers to download/install: $($DCU_analyze.updates.update.name)"
