@@ -27,8 +27,10 @@
 
 
 # Initial parameter setup with defaults
-$Run = $false
-$DownloadLocation = $null
+# Run without asking = 1 ; Run after asking = 0
+$Run = "0"
+# Default to user's temp folder
+$DownloadLocation = [System.IO.Path]::GetTempPath()
 
 # Predefined download locations
 $LocationMap = @{
@@ -38,8 +40,7 @@ $LocationMap = @{
     'loaner'    = Join-Path -Path $env:USERPROFILE -ChildPath 'Downloads\Loaner_Updater\'
 }
 
-# Default to user's temp folder
-$DownloadLocation = [System.IO.Path]::GetTempPath()
+
 
 # Ensure the Temp directory exists
 $TempPath = [System.IO.Path]::GetTempPath()
@@ -73,7 +74,6 @@ function CheckFolder {
         }
     }
 }
-
 # Parsing custom command-line arguments
 for ($i = 0; $i -lt $args.Count; $i++) {
     switch -Regex ($args[$i]) {
@@ -128,66 +128,45 @@ function Invoke-FileDownload {
     # Check if the file exists
     if (Test-Path $destinationPath) {
         Write-Output "Download complete."
+        RunLoanerQuest -destinationPath $destinationPath  # Call RunLoanerQuest with the downloaded file path  
     }
     else {
         Write-Output "Download failed or the file does not exist."
     }
 }
-function RunLoaner {
-    if ($Run -eq $true) {
-        Write-Host "Running Loaner script..."
-        & $destinationPath
-    }
-    else {
-        $choice = Read-Host "Run? (Y/N)"
-        if ($choice -eq 'Y' -or $choice -eq 'y') {
-            Write-Host "Running Loaner script..."
-            & $destinationPath
-        }
-        else {
-            Write-Host "Operation cancelled. Exiting script..." -ForegroundColor Yellow
-            return
-        }    
-    }
-}
-function RunLoaner {
-    param (
-        [string]$destinationPath
-    )
-    Write-Host "Running Loaner script..."
-    if (-not $destinationPath) {
-        Write-Host "Error: The destination path is not set." -ForegroundColor Red
-    } else {
-        Write-Host "Destination Path: $destinationPath"
-        & $destinationPath
-    }
-}
 function RunLoanerQuest {
-    
-    if ($Run -eq $true) {
+    param (
+        [string]$destinationPath  # Add a parameter to accept the file path
+    )
+    $runloanerstring = Out-String -InputObject $destinationPath
+    Write-Host $runloanerstring
+    if ($Run -eq "1") {
         Write-Host "Running Loaner script..."
-        & $destinationPath
+        Invoke-Expression -Command "$runloanerstring"
     }
-    if ($Run -eq $false){
-        $choice = Read-Host "Run? (Y/N)"
+    if ($Run -eq "0"){
+        $ChoiceText = "Run?"
+        Write-Host $ChoiceText -ForegroundColor Green
+        $choice = Read-Host "(Y/N)" 
         if ($choice -eq 'Y' -or $choice -eq 'y') {
-           RunLoaner
+            Invoke-Expression -Command "$runloanerstring"
         }
         else {
             Write-Host "Operation cancelled. Exiting script..." -ForegroundColor Yellow
             exit
         }    }
 }
-function Setup {
+
+function Main {
     Write-Host "Downloading and Running..."
-}
-
-
-try {
-    setup
     CheckFolder $DownloadLocation
     Invoke-FileDownload -url $url  -Headers $headers -destination $DownloadLocation
-    RunLoaner 
+    RunLoanerQuest
+}
+try {
+    Main
+    
+     
 }
 catch {
     Show-Error
