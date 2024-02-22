@@ -243,7 +243,6 @@ $UserRemake = { # This function is used to create the loaner user and delete the
     Function RunUserRemake {
         delete_loaneruser
         create_loaneruser
-        Set-OOBEbypass
     }
     RunUserRemake
 }
