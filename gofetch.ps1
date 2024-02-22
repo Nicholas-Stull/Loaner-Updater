@@ -28,7 +28,7 @@
 
 # Initial parameter setup with defaults
 # Run without asking = 1 ; Run after asking = 0
-$Run = "0"
+$Run = "1"
 # Default to user's temp folder
 $DownloadLocation = [System.IO.Path]::GetTempPath()
 
