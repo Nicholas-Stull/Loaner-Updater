@@ -41,7 +41,7 @@ $logdirname = "logfiles"
 $logDir = "$Loaner_Update_Dir\$logdirname"
 $timestamp = (Get-Date).toString("yyyy_MM_dd HH:mm:ss")
 $LogFileName = "Loaner_Log_" + (Get-Date).ToString("yyyy-MM-dd_HH-mm-ss") + "_log.txt"
-$logFile = "$LogDir\$LogFileName"
+$logFile = "$logDir\$LogFileName"
 $CompName = "$env:COMPUTERNAME"
 
 # Functions
@@ -305,6 +305,15 @@ $DellUpdates = {
     $DCU_exe = "$DCU_folder\dcu-cli.exe"
     $DCU_category = "firmware,driver"  # bios,firmware,driver,application,others
 
+    function doupdate {
+        try {
+            Start-Process $DCU_exe -ArgumentList "/applyUpdates -silent -reboot=enable -updateType=$DCU_category -outputlog=$DCU_report_log" -Wait
+            Write-Output "Installation completed"
+        }
+        catch {
+            Write-Error $_.Exception
+        }
+    }
     function detect {
         Try {
             if ([System.IO.File]::Exists($DCU_exe)) {
@@ -315,12 +324,12 @@ $DellUpdates = {
             
                 if ($DCU_analyze.updates.update.Count -lt 1) {
                     Write-Output "Compliant, no drivers needed"
-                    Restart-Computer
                     exit 0
                 }
                 else {
                     Write-Warning "Found drivers to download/install: $($DCU_analyze.updates.update.name)"
-                    Exit 1
+                    Write-Warning "Running Update"
+                    doupdate
                 }
             
             
@@ -336,20 +345,8 @@ $DellUpdates = {
         }
     }
 
-
-    function update {
-        try {
-            Start-Process $DCU_exe -ArgumentList "/applyUpdates -silent -reboot=enable -updateType=$DCU_category -outputlog=$DCU_report_log" -Wait
-            Write-Output "Installation completed"
-        }
-        catch {
-            Write-Error $_.Exception
-        }
-    }
-
     function DellCommandUpdateRun {
         detect
-        update
     }
     DellCommandUpdateRun
 }

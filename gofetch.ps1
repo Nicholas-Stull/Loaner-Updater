@@ -141,7 +141,6 @@ function RunLoanerQuest {
     $runloanerstring = Out-String -InputObject $destinationPath
     Write-Host $runloanerstring
     if ($Run -eq "1") {
-        Write-Host "Running Loaner script..."
         Invoke-Expression -Command "$runloanerstring"
     }
     if ($Run -eq "0"){
@@ -150,6 +149,8 @@ function RunLoanerQuest {
         $choice = Read-Host "(Y/N)" 
         if ($choice -eq 'Y' -or $choice -eq 'y') {
             Invoke-Expression -Command "$runloanerstring"
+            Write-Warning "'Should' Restart after run"
+            Restart-Computer -Force
         }
         else {
             Write-Host "Operation cancelled. Exiting script..." -ForegroundColor Yellow
