@@ -7,12 +7,12 @@
 Simply run this command with **PowerShell**.
 
 ```powershell
-irm loaners.nicholasstull.com | iex
+irm loaners.thetinkeringnerd.com | iex
 ```
 
 Due to the nature of how PowerShell works, passing arguments to the script is a bit harder. To do it as a one-line command, you can run this:
 ```powershell
-iex "& { $(iwr loaners.nicholasstull.com) } --servers"
+iex "& { $(iwr loaners.thetinkeringnerd.com) } --servers"
 ``` 
 ## Parameters
 - For more informatrion run 'LoanerPullDown.ps1 --help'
