@@ -118,7 +118,7 @@ function Invoke-FileDownload {
     $filename = "loaner.ps1"
     $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $headers.Add("Accept", "application/json")
-    $url = "https://github.com/Nicholas-Stull/Loaner-Updater/blob/main/loaner.ps1"
+    $url = "https://raw.githubusercontent.com/Nicholas-Stull/Loaner-Updater/main/loaner.ps1"
     $destinationPath = Join-Path -Path $DownloadLocation -ChildPath $filename
     Write-Host "Downloading to: $destinationPath"
 
