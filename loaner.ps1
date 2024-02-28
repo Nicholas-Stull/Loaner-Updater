@@ -102,9 +102,11 @@ $PragueCheck = {
 
         if ($softwareInstalled) {
             Write-Host "$softwareName is installed."
+            Write-Log -message "$softwareName is installed."
         }
         else {
             Write-Host "$softwareName is not installed."
+            Write-Log -message "$softwareName is not installed."
         }
     }
     function LoanerCheck {
@@ -129,11 +131,14 @@ $PragueCheck = {
         # Check if there is a difference
         if ($notOnLoanerList.Count -eq 0) {
             Write-Host "All Good! No new programs installed."
+            Write-Log -message "All Good! No new programs installed."
         }
         else {
             # Output programs not on the original list
             Write-Host "Programs installed that are not on the original list:"
             $notOnLoanerList
+            Write-Log -message "Programs installed that are not on the original list:"
+            Write-Log -message "$notOnLoanerList"
         }
     }
     function UninstallSoftware {
@@ -154,6 +159,7 @@ $PragueCheck = {
         }
         else {
             Write-Host "$softwareName is not installed."
+            Write-Log -message "$softwareName is not installed."
         }
     }
     
@@ -167,13 +173,16 @@ $PragueCheck = {
         }
         if (-not (Test-Path $destination)) {
             Write-Host "Dowloading Dell Command Update Installer"
+            Write-Log -message "Dowloading Dell Command Update Installer"
             Invoke-WebRequest -Uri $source -Headers $headers -OutFile $destination
         }
         else {
             Write-Host "Dell Command Update Installer already downloaded"
+            Write-Log -message "Dell Command Update Installer already downloaded"
         }
         Set-Location $ExeDir
         Write-Host "Running Dell Command Update Installer"
+        Write-Log -message "Running Dell Command Update Installer"
         Start-Process -FilePath $file -Verb RunAs -ArgumentList "/s" -Wait
     }
     function RunPragueCheck {
@@ -257,11 +266,14 @@ $PreLoginSetup = {
         }
         if (-not (Test-Path $RegKey.Path)) {
             Write-Verbose "$($RegKey.Path) does not exist. Creatng path."
+            Write-log -message "$($RegKey.Path) does not exist. Creatng path."
             New-Item -Path $RegKey.Path -Force
             Write-Verbose "$($RegKey.Path) path has been created."
+            Write-Log -message "$($RegKey.Path) path has been created."
         }
         New-ItemProperty @RegKey -Force
         Write-Verbose "Registry key has been added/modified"
+        Write-Log -message "Registry key has been added/modified"
         ###---Clear and redeclare RegKey variables
         $RegKey = @{}
         $RegKey = @{
@@ -272,11 +284,14 @@ $PreLoginSetup = {
         }
         if (-not (Test-Path $RegKey.Path)) {
             Write-Verbose "$($RegKey.Path) does not exist. Creatng path."
+            Write-Log -message "$($RegKey.Path) does not exist. Creatng path."
             New-Item -Path $RegKey.Path -Force
             Write-Verbose "$($RegKey.Path) path has been created."
+            Write-Log -message "$($RegKey.Path) path has been created."
         }
         New-ItemProperty @RegKey -Force
         Write-Verbose "Registry key has been added/modified"
+        Write-Log -message "Registry key has been added/modified"
         ###---Clear and redeclare RegKey variables    
         $RegKey = @{}
         $RegKey = @{
@@ -287,11 +302,14 @@ $PreLoginSetup = {
         }
         if (-not (Test-Path $RegKey.Path)) {
             Write-Verbose "$($RegKey.Path) does not exist. Creatng path."
+            Write-Log -message "$($RegKey.Path) does not exist. Creatng path."
             New-Item -Path $RegKey.Path -Force
             Write-Verbose "$($RegKey.Path) path has been created."
+            Write-Log -message "$($RegKey.Path) path has been created."
         }
         New-ItemProperty @RegKey -Force
         Write-Verbose "Registry key has been added/modified"
+        Write-Log -message "Registry key has been added/modified"
     }
     function Set-PreLoginSetup {
         Set-OOBEbypass
@@ -309,9 +327,11 @@ $DellUpdates = {
         try {
             Start-Process $DCU_exe -ArgumentList "/applyUpdates -silent -reboot=enable -updateType=$DCU_category -outputlog=$DCU_report_log" -Wait
             Write-Output "Installation completed"
+            Write-Log -message "Installation completed"
         }
         catch {
             Write-Error $_.Exception
+            Write-Log -message $_.Exception
         }
     }
     function detect {
@@ -325,11 +345,14 @@ $DellUpdates = {
                 if ($DCU_analyze.updates.update.Count -lt 1) {
                     Write-Verbose "Compliant, no drivers needed"
                     Write-Verbose "Restarting computer"
+                    Write-Log -message "Compliant, no drivers needed. Restarting..."
                     shutdown /r
                 }
                 else {
                     Write-Warning "Found drivers to download/install: $($DCU_analyze.updates.update.name)"
+                    Write-Log -message "Found drivers to download/install: $($DCU_analyze.updates.update.name)"
                     Write-Warning "Running Update"
+                    Write-Log -message "Running Update"
                     doupdate
                 }
             
@@ -337,11 +360,13 @@ $DellUpdates = {
             }
             else {
                 Write-Error "DELL Command Update missing"
+                Write-Log -message "DELL Command Update missing"
                 Exit 1
             }
         } 
         Catch {
             Write-Error $_.Exception
+            Write-Log -message $_.Exception
             Exit 1
         }
     }
