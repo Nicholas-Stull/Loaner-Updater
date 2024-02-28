@@ -318,13 +318,14 @@ $DellUpdates = {
         Try {
             if ([System.IO.File]::Exists($DCU_exe)) {
                 if (Test-Path "$DCU_report\DCUApplicableUpdates.xml") { Remove-Item "$DCU_report\DCUApplicableUpdates.xml" -Recurse -Force }
-                Start-Process $DCU_exe -ArgumentList "/scan -updateType=$DCU_category -report=$DCU_report" -Wait
+                Start-Process $DCU_exe -ArgumentList "/scan -updateType=$DCU_category -report=$DCU_report"
             
                 $DCU_analyze = if (Test-Path "$DCU_report\DCUApplicableUpdates.xml") { [xml](get-content "$DCU_report\DCUApplicableUpdates.xml") }
             
                 if ($DCU_analyze.updates.update.Count -lt 1) {
-                    Write-Output "Compliant, no drivers needed"
-                    exit 0
+                    Write-Verbose "Compliant, no drivers needed"
+                    Write-Verbose "Restarting computer"
+                    shutdown /r
                 }
                 else {
                     Write-Warning "Found drivers to download/install: $($DCU_analyze.updates.update.name)"

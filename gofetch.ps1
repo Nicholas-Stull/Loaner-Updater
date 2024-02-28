@@ -150,7 +150,7 @@ function RunLoanerQuest {
         if ($choice -eq 'Y' -or $choice -eq 'y') {
             Invoke-Expression -Command "$runloanerstring"
             Write-Warning "'Should' Restart after run"
-            Restart-Computer
+            shutdown /r
         }
         else {
             Write-Host "Operation cancelled. Exiting script..." -ForegroundColor Yellow
