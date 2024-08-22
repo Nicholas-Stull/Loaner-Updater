@@ -26,14 +26,14 @@ Dell Command Update - https://www.reddit.com/r/PowerShell/comments/yfiplr/commen
 
 
 #>
-$version = "1.1.0"
+$version = "1.1.2"
 $Branch = "main"
 # Script starts here
 # Parameters
 $VerbosePreference = "Continue"
 
 # change date here for when the loaner is to be locked by.
-$LoanerUseByDate = Get-Date -Year 2024 -Month 05 -Day 17 -Hour 00 -Minute 00 -Second 00
+$LoanerUseByDate = Get-Date -Year 2024 -Month 12 -Day 20 -Hour 00 -Minute 00 -Second 00
 
 # Log Variables
 $Loaner_Update_Dir = "C:\Users\Administrator\Documents\Loaner_Updater"
